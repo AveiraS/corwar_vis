@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   process.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sscarecr <sscarecr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: asmall <asmall@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/05 16:30:41 by sscarecr          #+#    #+#             */
-/*   Updated: 2020/04/15 01:55:18 by sscarecr         ###   ########.fr       */
+/*   Updated: 2020/05/11 18:55:20 by asmall           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,9 +37,11 @@ static int	get_argtypes(t_process *t, t_vm *vm, t_byte *argtypes)
 	sign = 1;
 	steps = 1;
 	while (++i < g_tab[t->op].argnum)
-		if (!(argtypes[i] = (vm->arena[cut(t->pc + 1)].code >> (6 - 2 * i)) & 0x03)
+		if (!(argtypes[i] =
+		(vm->arena[cut(t->pc + 1)].code >> (6 - 2 * i)) & 0x03)
 		|| (argtypes[i] == REG_CODE && ++steps &&
-		!((g_tab[t->op].args[i] & T_REG) && vm->arena[cut(t->pc + steps)].code > 0
+		!((g_tab[t->op].args[i] & T_REG)
+		&& vm->arena[cut(t->pc + steps)].code > 0
 		&& vm->arena[cut(t->pc + steps)].code <= REG_NUMBER))
 		|| (argtypes[i] == DIR_CODE && (steps += g_tab[t->op].dirsize) &&
 		!(g_tab[t->op].args[i] & T_DIR))
@@ -107,9 +109,5 @@ void		exec_instr(t_process *cur, t_vm *vm)
 		}
 	}
 	else
-	{
-		vm->arena[cur->pc].cursor = 0;
-		cur->pc = cut(cur->pc + 1);
-		vm->arena[cur->pc].cursor = 1;
-	}
+		exec_instr_modul(cur, vm);
 }

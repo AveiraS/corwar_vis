@@ -70,6 +70,9 @@ void		get_players(t_vm *vm, char **files)
 	{
 		get_player(vm->players + i, files[i]);
 		vm->players[i].num = i + 1;
+		vm->players[i].amount_cursors = 0;
+		vm->players[i].last_alive = 0;
+		vm->players[i].lives_in_current_period = 0;
 		++i;
 	}
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   battle.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sscarecr <sscarecr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: asmall <asmall@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/05 16:28:39 by sscarecr          #+#    #+#             */
-/*   Updated: 2020/04/15 02:02:39 by sscarecr         ###   ########.fr       */
+/*   Updated: 2020/05/12 14:53:33 by asmall           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,16 @@
 */
 
 #include "../include/corewar.h"
+#include "../include/visualizator.h"
 
 static void	kill_process(t_vm *vm, t_process *p)
 {
 	if (vm->verbosity & DEATHS)
 		ft_printf("Process %u hasn't lived for %d cycles (CTD %d)\n", p->num,
 		vm->cycle - p->last_live, vm->cycles_to_die);
+	vm->players[p->player_num].amount_cursors--;
+	vm->num_process--;
+	vm->arena[p->pc].cursor = 0;
 	free(p);
 }
 
@@ -50,6 +54,8 @@ static void	kill_processes(t_vm *vm)
 
 static int	check(t_vm *vm)
 {
+	unsigned	i;
+
 	kill_processes(vm);
 	if (++vm->checks >= MAX_CHECKS || vm->live_calls >= NBR_LIVE)
 	{
@@ -58,54 +64,54 @@ static int	check(t_vm *vm)
 		if (vm->verbosity & CYCLES)
 			ft_printf("Cycle to die is now %d\n", vm->cycles_to_die);
 	}
+	i = -1;
+	while (++i < vm->num_players)
+		vm->players[i].lives_in_current_period = 0;
 	vm->live_calls = 0;
 	vm->next_check = vm->cycle + vm->cycles_to_die;
-	vm->amount_of_checks++;
 	return (vm->start == NULL);
+}
+
+void		battle_help(t_vm *vm)
+{
+	t_process	*cur;
+
+	cur = vm->start;
+	if (vm->verbosity & CYCLES)
+		ft_printf("It is now cycle %u\n", vm->cycle);
+	while (cur)
+	{
+		if (cur->exec_cycle < vm->cycle)
+			read_instr(cur, vm);
+		if (cur->exec_cycle == vm->cycle)
+			exec_instr(cur, vm);
+		cur = cur->next;
+	}
 }
 
 int			battle(t_vm *vm)
 {
-	t_process	*cur;
-
 	if (vm->visual && !init())
-			return (0);
+		return (0);
 	while (!vm->vis_quit)
 	{
-		vm->cycle++;
 		if (vm->visual)
 			visualisator_event(vm);
 		if (!vm->vis_pause)
 		{
-			if (vm->verbosity & CYCLES)
-				ft_printf("It is now cycle %u\n", vm->cycle);
-			cur = vm->start;
-			while (cur)
-			{
-				if (cur->exec_cycle < vm->cycle)
-					read_instr(cur, vm);
-				if (cur->exec_cycle == vm->cycle)
-					exec_instr(cur, vm);
-				cur = cur->next;
-			}
+			vm->cycle++;
+			battle_help(vm);
 			if (vm->cycle >= vm->next_check && check(vm))
 				break ;
 			if (vm->visual)
-			{
-				push_to_render_battlefield(vm);
-				push_info(vm, "***Running***");
-				SDL_RenderPresent(g_main_render);
-			}
+				run_pause_module(vm, 1);
 			if (vm->dump_len && vm->dump_cycle == vm->cycle)
-				return (0);
-				// return (dump(vm));
+				return (dump(vm));
 		}
 		else
-		{
-			push_to_render_battlefield(vm);
-			push_info(vm, "***Pause***");
-			SDL_RenderPresent(g_main_render);
-		}
+			run_pause_module(vm, 0);
 	}
+	if (vm->visual)
+		battle_module(vm);
 	return (1);
 }

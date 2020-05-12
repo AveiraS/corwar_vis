@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   corewar.h                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sscarecr <sscarecr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: asmall <asmall@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/05 16:28:58 by sscarecr          #+#    #+#             */
-/*   Updated: 2020/04/15 01:53:56 by sscarecr         ###   ########.fr       */
+/*   Updated: 2020/05/12 15:06:46 by asmall           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,14 +34,17 @@
 
 typedef unsigned char	t_byte;
 
-typedef struct	s_player
+typedef struct		s_player
 {
-	t_header	header;
-	t_byte		*code;
-	unsigned	num;
-}				t_player;
+	t_header			header;
+	t_byte				*code;
+	unsigned			num;
+	unsigned			last_alive;
+	unsigned			lives_in_current_period;
+	unsigned			amount_cursors;
+}					t_player;
 
-typedef struct	s_process
+typedef struct		s_process
 {
 	unsigned			num;
 	unsigned			last_live;
@@ -53,95 +56,101 @@ typedef struct	s_process
 	unsigned			player_num;
 	char				color;
 	unsigned			exec_cycle;
-}				t_process;
+}					t_process;
 
-typedef struct	s_battlefield
+typedef struct		s_battlefield
 {
-	t_byte		code;
-	char		color;
-	int			color_r;
-	int			color_g;
-	int			color_b;
-	int			write_cycles;
-	t_byte		cursor;
-}				t_battlefield;
+	t_byte				code;
+	char				color;
+	int					color_r;
+	int					color_g;
+	int					color_b;
+	int					write_cycles;
+	t_byte				cursor;
+}					t_battlefield;
 
-
-typedef struct	s_vm
+typedef struct		s_vm
 {
 	t_battlefield		arena[MEM_SIZE];
-	unsigned	num_players;
-	t_player	*players;
-	unsigned	num_process;
-	t_process	*start;
-	unsigned	cycle;
-	int			cycles_to_die;
-	unsigned	checks;
-	unsigned	next_check;
-	unsigned	live_calls;
-	unsigned	last_alive;
-	unsigned	dump_cycle;
-	unsigned	dump_len;
-	unsigned	verbosity;
-	unsigned	amount_of_checks;
-	t_byte		visual;
-	t_byte		vis_quit;
-	t_byte		vis_pause;
-}				t_vm;
+	unsigned			num_players;
+	t_player			*players;
+	unsigned			num_process;
+	t_process			*start;
+	unsigned			cycle;
+	int					cycles_to_die;
+	unsigned			checks;
+	unsigned			next_check;
+	unsigned			live_calls;
+	unsigned			last_alive;
+	unsigned			dump_cycle;
+	unsigned			dump_len;
+	unsigned			verbosity;
+	t_byte				visual;
+	t_byte				vis_quit;
+	t_byte				vis_pause;
+}					t_vm;
 
-typedef struct	s_op
+typedef struct		s_op
 {
-	void	(*func)(t_process*, t_vm*, t_byte *argtypes, int* args);
-	t_byte	typebyte;
-	int		argnum;
-	char	args[3];
-	int		dirsize;
-	int		lag;
-}				t_op;
-
-# include "visualizator.h"
+	void			(*func)(t_process*, t_vm*, t_byte *argtypes, int* args);
+	t_byte			typebyte;
+	int				argnum;
+	char			args[3];
+	int				dirsize;
+	int				lag;
+}					t_op;
 
 extern const t_op	g_tab[];
 
-void			sys_error(char *s);
-void			error(char *s);
-void			error2(char *s, char *t);
-void			usage(void);
-void			check_invariants(void);
+void				sys_error(char *s);
+void				error(char *s);
+void				error2(char *s, char *t);
+void				usage(void);
+void				check_invariants(void);
 
-void			input(t_vm *vm, int ac, char **av);
-void			get_players(t_vm *vm, char **files);
+void				input(t_vm *vm, int ac, char **av);
+void				get_players(t_vm *vm, char **files);
 
-void			introduce(t_vm *vm);
-void			declare_winner(t_vm *vm);
-void			print_movement(t_battlefield *arena, int pc, int n);
-// int				dump(t_vm *vm);
+void				introduce(t_vm *vm);
+void				declare_winner(t_vm *vm);
+void				print_movement(t_battlefield *arena, int pc, int n);
+int					dump(t_vm *vm);
 
-int				cut(int n);
-void			init_arena(t_vm *vm);
-int				read_dir(int start, t_battlefield *arena);
-int				read_ind(int start, t_battlefield *arena);
-void			write_bytes(int n, int start, t_battlefield *arena, char color);
-int				battle(t_vm *vm);
-void			read_instr(t_process *cur, t_vm *vm);
-void			exec_instr(t_process *cur, t_vm *vm);
-void			delete_vm(t_vm *vm);
+int					cut(int n);
+void				init_arena(t_vm *vm, unsigned i);
+void				init_arena_modul(t_vm *vm, int byte);
 
-void			live(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			ld(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			st(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			add(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			sub(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			and(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			or(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			xor(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			zjmp(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			ldi(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			sti(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			sfork(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			lld(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			lldi(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			lfork(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
-void			aff(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+int					arena_players_modul(t_vm *vm,
+						unsigned i, int step, int byte);
+t_process			*new_process_vm(t_process *next, unsigned num,
+						unsigned player_num, int pc);
+int					read_dir(int start, t_battlefield *arena);
+int					read_ind(int start, t_battlefield *arena);
+void				write_bytes(int n, int start,
+						t_battlefield *arena, char color);
+int					battle(t_vm *vm);
+void				battle_module(t_vm *vm);
+void				run_pause_module(t_vm *vm, int flag);
+void				read_instr(t_process *cur, t_vm *vm);
+void				exec_instr_modul(t_process *cur, t_vm *vm);
+void				exec_instr(t_process *cur, t_vm *vm);
+void				delete_vm(t_vm *vm);
+
+void				live(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				ld(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				st(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				add(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				sub(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				and(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				or(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				xor(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				zjmp(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				ldi(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				sti(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				sfork(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				lld(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				lldi(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				lfork(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
+void				aff(t_process *t, t_vm *vm, t_byte *argtypes, int *args);
 
 #endif

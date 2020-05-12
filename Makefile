@@ -1,6 +1,6 @@
 NAME = corewar
 CC = gcc
-FLAGS = -g -Wall -Wextra -Werror
+FLAGS = -Wall -Wextra -Werror
 HEAD_DIR = include
 SRC_DIR = src
 OBJ_DIR = obj
@@ -9,7 +9,7 @@ LIBFT = $(LIBFT_DIR)/libft.a
 LIBFT_HEAD = $(LIBFT_DIR)/include
 HEAD_FILES = corewar.h op.h
 VIS_FOLDER = visualizator
-SRC_FILES = main.c error.c input.c arena.c battle.c delete.c op1.c op2.c op3.c op4.c output.c players.c process.c table.c
+SRC_FILES = main.c error.c input.c arena.c battle.c delete.c op1.c op2.c op3.c op4.c output.c players.c process.c table.c vmodul.c
 SRC_VIS = 	$(VIS_FOLDER)/choose_colors_pt1.c \
 			$(VIS_FOLDER)/choose_colors_pt2.c \
 			$(VIS_FOLDER)/push_info.c \
@@ -19,7 +19,9 @@ SRC = $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 OBJ = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC))
 INCLUDE_FOLDER = include/
 
+# On Ubuntu:
 FRAMEWORKS = -lSDL2 -lSDL2_ttf -LSDL2_image -lSDL
+# On MacOS
 #FRAMEWORKS =	-I/Library/Frameworks/SDL2.framework/Headers -F ~/Library/Frameworks -framework SDL2 \
 			-I/Library/Frameworks/SDL2_ttf.framework/Headers -F ~/Library/Frameworks -framework SDL2_ttf
 
@@ -28,6 +30,7 @@ all: $(NAME)
 -include $(OBJ:.o=.d)
 
 $(NAME): $(LIBFT)
+# bash script - on Mac to install Framework
 #	@bash $(VIS_FOLDER)/script.bash
 	@gcc $(FLAGS) $(SRC) $(SRC_VIS) $(FRAMEWORKS) $(LIBFT) -I $(INCLUDE_FOLDER) -I $(LIBFT_HEAD) -o $(NAME)
 

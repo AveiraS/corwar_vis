@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   op1.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sscarecr <sscarecr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: asmall <asmall@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/05 16:29:43 by sscarecr          #+#    #+#             */
-/*   Updated: 2020/04/13 22:43:31 by sscarecr         ###   ########.fr       */
+/*   Updated: 2020/05/11 18:43:23 by asmall           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ void	live(t_process *t, t_vm *vm, t_byte *argtypes, int *args)
 	if (-args[0] > 0 && (unsigned)(-args[0]) <= vm->num_players)
 	{
 		vm->last_alive = vm->players[-args[0] - 1].num;
+		vm->players[t->player_num].last_alive = vm->cycle;
+		vm->players[t->player_num].lives_in_current_period++;
 		if (vm->verbosity & LIVES)
 			ft_printf(COPYCAT ? "Player %u (%s) is said to be alive\n" :
 			"A process shows that player %u (%s) is alive\n",
@@ -41,7 +43,8 @@ void	ld(t_process *t, t_vm *vm, t_byte *argtypes, int *args)
 void	st(t_process *t, t_vm *vm, t_byte *argtypes, int *args)
 {
 	if (argtypes[1] == IND_CODE)
-		write_bytes(t->reg[args[0] - 1], t->pc + args[1] % IDX_MOD, vm->arena, t->color);
+		write_bytes(t->reg[args[0] - 1],
+			t->pc + args[1] % IDX_MOD, vm->arena, t->color);
 	else
 		t->reg[args[1] - 1] = t->reg[args[0] - 1];
 	if (vm->verbosity & OPERATIONS)

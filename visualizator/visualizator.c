@@ -22,7 +22,7 @@ void	push_info(t_vm *vm, char *status)
 	push_int_text(vm->cycles_to_die, "Cycle to die: ", 100, White);
 	push_int_text(CYCLE_DELTA, "Cycle delta: ", 120, White);
 	push_int_slash_data(160, vm->live_calls, NBR_LIVE, "NBR_live: ", White);
-	push_int_slash_data(180, vm->amount_of_checks, MAX_CHECKS, "MAX_checks: ", White);
+	push_int_slash_data(180, vm->checks, MAX_CHECKS, "MAX_checks: ", White);
 	push_char_text("Live breakdown for now:", SCREEN_HEIGHT - 80, White);
 	push_live_breakdown(vm, SCREEN_HEIGHT - 60);
 	push_char_text("Arena distribution: ", SCREEN_HEIGHT - 40, White);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   op3.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: sscarecr <sscarecr@student.42.fr>          +#+  +:+       +#+        */
+/*   By: asmall <asmall@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/04/05 16:29:53 by sscarecr          #+#    #+#             */
-/*   Updated: 2020/04/13 22:45:01 by sscarecr         ###   ########.fr       */
+/*   Updated: 2020/05/11 18:56:41 by asmall           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ void	sti(t_process *t, t_vm *vm, t_byte *argtypes, int *args)
 	else
 		a = t->reg[args[1] - 1];
 	b = (argtypes[2] == DIR_CODE ? args[2] : t->reg[args[2] - 1]);
-	write_bytes(t->reg[args[0] - 1], t->pc + (a + b) % IDX_MOD, vm->arena, t->color);
+	write_bytes(t->reg[args[0] - 1],
+		t->pc + (a + b) % IDX_MOD, vm->arena, t->color);
 	if (vm->verbosity & OPERATIONS)
 	{
 		ft_printf("P %4u | sti r%d %d %d\n", t->num, args[0], a, b);
@@ -46,6 +47,7 @@ void	sfork(t_process *t, t_vm *vm, t_byte *argtypes, int *args)
 	p->next = vm->start;
 	p->color = t->color;
 	vm->start = p;
+	vm->players[t->player_num].amount_cursors++;
 	if (vm->verbosity & OPERATIONS)
 		ft_printf("P %4u | fork %d (%d)\n", t->num, args[0],
 		t->pc + args[0] % IDX_MOD);
@@ -101,6 +103,7 @@ void	lfork(t_process *t, t_vm *vm, t_byte *argtypes, int *args)
 	p->next = vm->start;
 	p->color = t->color;
 	vm->start = p;
+	vm->players[t->player_num].amount_cursors++;
 	if (vm->verbosity & OPERATIONS)
 		ft_printf("P %4u | lfork %d (%d)\n", t->num, args[0], t->pc + args[0]);
 }
