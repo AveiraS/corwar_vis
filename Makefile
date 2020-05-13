@@ -1,6 +1,6 @@
 NAME = corewar
 CC = gcc
-FLAGS = -Wall -Wextra -Werror
+FLAGS = -g -Wall -Wextra -Werror
 HEAD_DIR = include
 SRC_DIR = src
 OBJ_DIR = obj
@@ -13,14 +13,16 @@ SRC_FILES = main.c error.c input.c arena.c battle.c delete.c op1.c op2.c op3.c o
 SRC_VIS = 	$(VIS_FOLDER)/choose_colors_pt1.c \
 			$(VIS_FOLDER)/choose_colors_pt2.c \
 			$(VIS_FOLDER)/push_info.c \
+			$(VIS_FOLDER)/push_info_pt2.c \
 			$(VIS_FOLDER)/visualizator.c \
+			$(VIS_FOLDER)/visualizator_help_pt2.c \
 			$(VIS_FOLDER)/visualizator_help.c
 SRC = $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 OBJ = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC))
 INCLUDE_FOLDER = include/
 
 # On Ubuntu:
-FRAMEWORKS = -lSDL2 -lSDL2_ttf -LSDL2_image -lSDL
+ FRAMEWORKS = -lSDL2 -lSDL2_ttf -LSDL2_image -lSDL
 # On MacOS
 #FRAMEWORKS =	-I/Library/Frameworks/SDL2.framework/Headers -F ~/Library/Frameworks -framework SDL2 \
 			-I/Library/Frameworks/SDL2_ttf.framework/Headers -F ~/Library/Frameworks -framework SDL2_ttf

@@ -176,7 +176,7 @@ typedef int8_t Sint8;
  */
 #define SDL_MAX_UINT8   ((Uint8)0xFF)           /* 255 */
 #define SDL_MIN_UINT8   ((Uint8)0x00)           /* 0 */
-typedef uint8_t Uint8;
+typedef u_int8_t Uint8;
 /**
  * \brief A signed 16-bit integer type.
  */

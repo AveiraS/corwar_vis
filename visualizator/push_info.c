@@ -6,13 +6,13 @@
 /*   By: asmall <asmall@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/10 17:05:44 by asmall            #+#    #+#             */
-/*   Updated: 2020/05/12 15:43:49 by asmall           ###   ########.fr       */
+/*   Updated: 2020/05/13 20:25:02 by asmall           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/visualizator.h"
 
-void	push_distribution(t_battlefield *arena, float y)
+void			push_distribution(t_battlefield *arena, float y)
 {
 	int			colors[9];
 	int			i;
@@ -39,27 +39,17 @@ void	push_distribution(t_battlefield *arena, float y)
 	}
 }
 
-void	push_live_breakdown(t_vm *vm, int y)
+void			push_live_breakdown(t_vm *vm, int y)
 {
-	unsigned	i;
-	float		k;
+	int			sum;
 	SDL_FRect	coor;
 
 	coor.y = y;
 	coor.x = SCREEN_WIDTH - INFORMATION_SIZE + 25;
 	coor.h = 15;
+	sum = 0;
 	if (vm->live_calls > 0)
-	{
-		k = 300 / (float)vm->live_calls;
-		i = -1;
-		while (++i < vm->num_players)
-		{
-			coor.w = vm->players[i].lives_in_current_period * k;
-			set_render_draw_color(choose_color_char(i));
-			SDL_RenderFillRectF(g_main_render, &coor);
-			coor.x += coor.w;
-		}
-	}
+		live_players(vm, coor, sum);
 	else
 	{
 		SDL_SetRenderDrawColor(g_main_render, 255, 255, 255, 255);
@@ -68,22 +58,26 @@ void	push_live_breakdown(t_vm *vm, int y)
 	}
 }
 
-void	put_text_texture(float y, char *temp_2, SDL_Rect coor, SDL_Texture	*text_texture)
+void			put_text_texture(float y, char *temp_2,
+					char *temp_3, SDL_Texture *text_texture)
 {
-	TTF_SizeText(g_font, temp_2, &coor.w, &coor.h);
+	SDL_Rect	coor;
+
+	(temp_2) ? (TTF_SizeText(g_font, temp_2, &coor.w, &coor.h)) :
+		TTF_SizeText(g_font, temp_3, &coor.w, &coor.h);
 	coor.x = SCREEN_WIDTH - INFORMATION_SIZE + 50;
 	coor.y = y;
 	SDL_RenderCopy(g_main_render, text_texture, NULL, &coor);
 	SDL_DestroyTexture(text_texture);
 }
 
-void	push_int_text(int data, char *info_text, float y, SDL_Color color)
+void			push_int_text(int data, char *info_text,
+					float y, SDL_Color color)
 {
 	char		*temp_1;
 	char		*temp_2;
 	SDL_Surface	*text_surface;
 	SDL_Texture	*text_texture;
-	SDL_Rect	coor;
 
 	text_surface = NULL;
 	text_texture = NULL;
@@ -93,141 +87,27 @@ void	push_int_text(int data, char *info_text, float y, SDL_Color color)
 	text_surface = TTF_RenderText_Solid(g_font, temp_2, color);
 	if (text_surface)
 	{
-		text_texture = SDL_CreateTextureFromSurface(g_main_render, text_surface);
+		text_texture = SDL_CreateTextureFromSurface(g_main_render,
+			text_surface);
 		SDL_FreeSurface(text_surface);
 		if (text_texture)
-		{
-			put_text_texture(y, temp_2, coor, text_texture);
-			// TTF_SizeText(g_font, temp_2, &coor.w, &coor.h);
-			// coor.x = SCREEN_WIDTH - INFORMATION_SIZE + 50;
-			// coor.y = y;
-			// SDL_RenderCopy(g_main_render, text_texture, NULL, &coor);
-			// SDL_DestroyTexture(text_texture);
-		}
+			put_text_texture(y, temp_2, 0, text_texture);
 	}
 	ft_strdel(&temp_2);
 }
 
-void	push_int_slash_data(float y, int data_1, int data_2, char *text, SDL_Color color)
+void			key_pause_quite(t_vm *vm)
 {
-	char		*temp_1;
-	char		*temp_2;
-	char		*temp_3;
-	SDL_Surface	*text_surface = NULL;
-	SDL_Texture	*text_texture = NULL;
-	SDL_Rect	coor;
+	SDL_Event	event;
 
-	temp_1 = ft_itoa(data_1);
-	temp_2 = ft_itoa(data_2);
-	temp_3 = ft_strjoin_n(4, text, temp_1, "/", temp_2);
-	ft_strdel(&temp_1);
-	ft_strdel(&temp_2);
-	text_surface = TTF_RenderText_Solid(g_font, temp_3, color);
-	if (text_surface)
-	{
-		text_texture = SDL_CreateTextureFromSurface(g_main_render, text_surface);
-		SDL_FreeSurface(text_surface);
-		if (text_texture)
+	while (!vm->vis_pause && !vm->vis_quit)
+		while (SDL_PollEvent(&event))
 		{
-			TTF_SizeText(g_font, temp_3, &coor.w, &coor.h);
-			coor.x = SCREEN_WIDTH - INFORMATION_SIZE + 50;
-			coor.y = y;
-			SDL_RenderCopy(g_main_render, text_texture, NULL, &coor);
-			SDL_DestroyTexture(text_texture);
+			if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN
+				&& event.key.keysym.sym == SDLK_ESCAPE))
+				vm->vis_quit = 1;
+			if (event.type == SDL_KEYDOWN
+				&& event.key.keysym.sym == SDLK_SPACE)
+				vm->vis_pause = 1;
 		}
-	}
-	ft_strdel(&temp_3);
-}
-
-void	push_char_text(char *text, float y, SDL_Color color)
-{
-	SDL_Surface	*text_surface;
-	SDL_Texture	*text_texture;
-	SDL_Rect	coor;
-
-	text_surface = NULL;
-	text_texture = NULL;
-	TTF_SizeText(g_font, text, &coor.w, &coor.h);
-	coor.x = SCREEN_WIDTH - INFORMATION_SIZE + 50;
-	coor.y = y;
-	text_surface = TTF_RenderText_Solid(g_font, text, color);
-	if (text_surface)
-	{
-		text_texture = SDL_CreateTextureFromSurface(g_main_render, text_surface);
-		SDL_FreeSurface(text_surface);
-		if (text_texture)
-		{
-			SDL_RenderCopy(g_main_render, text_texture, NULL, &coor);
-			SDL_DestroyTexture(text_texture);
-		}
-	}
-}
-
-void	push_players(t_vm *vm, int start_y)
-{
-	unsigned	i;
-	int	pos;
-	SDL_Color	White = {255, 255, 255, 255};
-	SDL_Color	color;
-
-	i = -1;
-	pos = start_y;
-	while (++i < vm->num_players)
-	{
-		push_int_text(i + 1, "Player # ", pos, White);
-		set_sdl_color(&color, i);
-		push_char_text(vm->players[i].header.prog_name, pos + 20, color);
-		push_int_text(vm->players[i].num, "ID: ", pos + 40, White);
-		push_int_text(vm->players[i].last_alive, "Last alive: ", pos + 60, White);
-		push_int_text(vm->players[i].lives_in_current_period, "Lives in current period : ", pos + 80, White);
-		push_int_text(vm->players[i].amount_cursors, "Amount of coaches: ", pos + 100, White);
-		pos += 160;
-	}
-}
-
-void	push_winner_vis(t_vm *vm)
-{
-	SDL_Color				White = {255, 255, 255, 255};
-	SDL_Color				winner;
-	SDL_Rect				pos;
-	SDL_Texture				*text_texture;
-	SDL_Surface				*text_surface;
-	SDL_Event				event;
-
-	vm->vis_pause = 0;
-	vm->vis_quit = 0;
-	push_to_render_battlefield(vm);
-	push_info(vm, "**Pause**");
-
-	pos.x = SCREEN_WIDTH - INFORMATION_SIZE + 50;
-	pos.y = SCREEN_HEIGHT - 120;
-	text_surface = NULL;
-	text_texture = NULL;
-	winner.a = 255;
-	set_sdl_color(&winner, vm->last_alive);
-	text_surface = TTF_RenderText_Solid(g_font, "Winner is: ", White);
-	text_texture = SDL_CreateTextureFromSurface(g_main_render, text_surface);
-	SDL_FreeSurface(text_surface);
-	TTF_SizeText(g_font, "Winner is: ", &pos.w, &pos.h);
-	SDL_RenderCopy(g_main_render, text_texture, NULL, &pos);
-	SDL_DestroyTexture(text_texture);
-	pos.x += pos.w + 10;
-	text_surface = TTF_RenderText_Solid(g_font, vm->players[vm->last_alive].header.prog_name, winner);
-	text_texture = SDL_CreateTextureFromSurface(g_main_render, text_surface);
-	SDL_FreeSurface(text_surface);
-	TTF_SizeText(g_font, vm->players[vm->last_alive].header.prog_name, &pos.w, &pos.h);
-	SDL_RenderCopy(g_main_render, text_texture, NULL, &pos);
-	SDL_DestroyTexture(text_texture);
-
-	SDL_RenderPresent(g_main_render);
-		while (!vm->vis_pause && !vm->vis_quit)
-			while (SDL_PollEvent(&event))
-			{
-				if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN
-					&& event.key.keysym.sym == SDLK_ESCAPE))
-					vm->vis_quit = 1;
-				if (event.type == SDL_KEYDOWN
-					&& event.key.keysym.sym == SDLK_SPACE)
-					vm->vis_pause = 1;
-			}
 }

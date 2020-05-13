@@ -6,41 +6,59 @@
 /*   By: asmall <asmall@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/05/10 17:06:04 by asmall            #+#    #+#             */
-/*   Updated: 2020/05/10 17:06:07 by asmall           ###   ########.fr       */
+/*   Updated: 2020/05/13 20:13:17 by asmall           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/visualizator.h"
 
-int			init()
+int			init_help(t_vm *vm)
 {
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	if (g_main_render == NULL)
 	{
-		ft_printf("SDL could not initialize. SDL error: %s\n", SDL_GetError());
-		return (0);
-	}
-	g_main_window = SDL_CreateWindow("Corewar", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-	if (g_main_window == NULL)
-	{
-		ft_printf("SDL could not create window. SDL error: %s\n", SDL_GetError());
-		return (0);
-	}
-	g_main_render = SDL_CreateRenderer(g_main_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if(g_main_render == NULL )
-	{
-		ft_printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
+		ft_printf("Renderer could not be created! SDL Error: %s\n",
+			SDL_GetError());
 		return (0);
 	}
 	if (TTF_Init() < 0)
 	{
-		ft_printf("SDL_ttf couldn't initialize. SDL error: %s\n", TTF_GetError());
+		ft_printf("SDL_ttf couldn't initialize. SDL error: %s\n",
+			TTF_GetError());
 		return (0);
 	}
-	if (!(g_font = TTF_OpenFont("visualizator/InputMono-Regular.ttf", 15)))
+	if (vm->num_players > 1)
+		g_font = TTF_OpenFont("visualizator/InputMono-Regular.ttf",
+			15 - (vm->num_players - 1));
+	else
+		g_font = TTF_OpenFont("visualizator/InputMono-Regular.ttf", 15);
+	if (!g_font)
 	{
 		ft_printf("%s\n", TTF_GetError());
 		return (0);
 	}
+	return (1);
+}
+
+int			init(t_vm *vm)
+{
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
+		ft_printf("SDL could not initialize. SDL error: %s\n",
+			SDL_GetError());
+		return (0);
+	}
+	g_main_window = SDL_CreateWindow("Corewar", SDL_WINDOWPOS_UNDEFINED,
+						SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH,
+						SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	if (g_main_window == NULL)
+	{
+		ft_printf("SDL could not create window. SDL error: %s\n",
+			SDL_GetError());
+		return (0);
+	}
+	g_main_render = SDL_CreateRenderer(g_main_window, -1,
+		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	init_help(vm);
 	return (1);
 }
 
@@ -66,69 +84,11 @@ void		set_render_draw_color(char color)
 		SDL_SetRenderDrawColor(g_main_render, 111, 111, 111, 255);
 }
 
-void	set_sdl_color(SDL_Color *color, int i)
-{
-	if (i == 0 || i == 'r')
-	{
-		color->r = 155;
-		color->g = 0;
-		color->b = 0;
-	}
-	else if (i == 1 || i == 'y')
-	{
-		color->r = 155;
-		color->g = 155;
-		color->b = 0;
-	}
-	else if (i == 2 || i == 'g')
-	{
-		color->r = 0;
-		color->g = 155;
-		color->b = 0;
-	}
-	else if (i == 3 || i == 'b')
-	{
-		color->r = 0;
-		color->g = 0;
-		color->b = 155;
-	}
-	else if (i == 4 || i == 'p')
-	{
-		color->r = 155;
-		color->g = 0;
-		color->b = 155;
-	}
-	else if (i == 5 || i == 'c')
-	{
-		color->r = 0;
-		color->g = 155;
-		color->b = 155;
-	}
-	else if (i == 6 || i == 'e')
-	{
-		color->r = 155;
-		color->g = 155;
-		color->b = 155;
-	}
-	else if (i == 7 || i == 'l')
-	{
-		color->r = 50;
-		color->g = 50;
-		color->b = 50;
-	}
-	else if (i == 'n')
-	{
-		color->r = 111;
-		color->g = 111;
-		color->b = 111;
-	}
-}
-
-void	visualisator_event(t_vm *vm)
+void		visualisator_event(t_vm *vm)
 {
 	SDL_Event	event;
 
-	while(SDL_PollEvent(&event))
+	while (SDL_PollEvent(&event))
 	{
 		if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN
 			&& event.key.keysym.sym == SDLK_ESCAPE))

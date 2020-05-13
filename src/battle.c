@@ -91,7 +91,7 @@ void		battle_help(t_vm *vm)
 
 int			battle(t_vm *vm)
 {
-	if (vm->visual && !init())
+	if (vm->visual && !init(vm))
 		return (0);
 	while (!vm->vis_quit)
 	{
